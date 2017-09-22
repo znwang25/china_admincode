@@ -22,7 +22,7 @@ class StatsSpider(scrapy.Spider):
 
     def parse_provincetr(self, response, trs):
         year_pattern = re.compile('(tjyqhdmhcxhfdm/)([0-9][0-9][0-9][0-9])')
-        year = year_pattern.search(response.url)[2]
+        year = year_pattern.search(response.url).group(2)
         for td in trs.xpath('td'):
             item = AdmincodeItem()
             item['year'] = year
