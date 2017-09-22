@@ -1,24 +1,18 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import re
 from admincode.items import AdmincodeItem
 
 
 class StatsSpider(scrapy.Spider):
     name = 'stats'
     allowed_domains = ['stats.gov.cn']
-    start_urls = ['http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/index.html']
+    start_urls = [
+        'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/{}/index.html'.format(year) for year in range(2009, 2017)]
 
     def parse(self, response):
-        for ret in self.parse_provincetr(response, response.selector.css(".provincetr")):
-            yield ret
-        for ret in self.parse_citytr(response, response.selector.css(".citytr")):
-            yield ret
-        for ret in self.parse_countytr(response, response.selector.css(".countytr")):
-            yield ret
-        for ret in self.parse_towntr(response, response.selector.css(".towntr")):
-            yield ret
-        for ret in self.parse_villagetr(response, response.selector.css(".villagetr")):
-            yield ret
+        for item in self.parse_provincetr(response, response.selector.css(".provincetr")):
+            yield item
 
     def get_text_href(self, td):
         if not td.xpath('a'):
@@ -27,56 +21,38 @@ class StatsSpider(scrapy.Spider):
             return td.xpath('a/text()').extract()[0], td.xpath('a/@href').extract()[0]
 
     def parse_provincetr(self, response, trs):
+        year_pattern = re.compile('(tjyqhdmhcxhfdm/)([0-9][0-9][0-9][0-9])')
+        year = year_pattern.search(response.url)[2]
         for td in trs.xpath('td'):
             item = AdmincodeItem()
-            item['codetype'] = 'province'
-            item['name'], href = self.get_text_href(td)
-            if href:
-                item['code'] = href.split('.')[0] + ('0' * 10)
-                item['parent_code'] = item.get_parent()
-                item['url'] = response.urljoin(href)
-            yield item
-            if 'url' in item.keys():
-                yield scrapy.Request(item['url'], callback=self.parse)
+            item['year'] = year
+            item['prov_name'], href = self.get_text_href(td)
 
-    def parse_2td(self, response, trs, codetype):
+            if href:
+                url = response.urljoin(href)
+                yield scrapy.Request(url, callback=self.parse_citytr,
+                                     meta={'item': item})
+
+    def parse_2td(self, response, trs, var_name, nextparse):
         for tr in trs:
-            item = AdmincodeItem()
-            item['codetype'] = codetype
-            item['code'], href = self.get_text_href(tr.xpath('td')[0])
-            item['parent_code'] = item.get_parent()
-            if href:
-                item['url'] = response.urljoin(href)
-            item['name'], href = self.get_text_href(tr.xpath('td')[1])
-            if href:
-                item['url'] = response.urljoin(href)
-            yield item
-            if 'url' in item.keys():
-                yield scrapy.Request(item['url'], callback=self.parse)
+            item = response.meta['item']
+            item[var_name], href = self.get_text_href(tr.xpath('td')[1])
+            if nextparse:
+                url = response.urljoin(href)
+                yield scrapy.Request(url, callback=nextparse, meta={'item': item})
+            else:
+                item['gbcode'], href = self.get_text_href(
+                    tr.xpath('td')[0])
+                yield item
 
-    def parse_citytr(self, response, trs):
-        return self.parse_2td(response, trs, 'city')
+    def parse_citytr(self, response):
+        for city in self.parse_2td(response, response.selector.css(".citytr"), 'city_name', self.parse_countytr):
+            yield city
 
-    def parse_countytr(self, response, trs):
-        return self.parse_2td(response, trs, 'county')
+    def parse_countytr(self, response):
+        for county in self.parse_2td(response, response.selector.css(".countytr"), 'county_name', self.parse_towntr):
+            yield county
 
-    def parse_towntr(self, response, trs):
-        return self.parse_2td(response, trs, 'town')
-
-    def parse_villagetr(self, response, trs):
-        for tr in trs:
-            item = AdmincodeItem()
-            item['codetype'] = 'village'
-            item['code'], href = self.get_text_href(tr.xpath('td')[0])
-            item['parent_code'] = item.get_parent()
-            if href:
-                item['url'] = response.urljoin(href)
-            item['towntypecode'], href = self.get_text_href(tr.xpath('td')[1])
-            if href:
-                item['url'] = response.urljoin(href)
-            item['name'], href = self.get_text_href(tr.xpath('td')[2])
-            if href:
-                item['url'] = response.urljoin(href)
-            yield item
-            if 'url' in item.keys():
-                yield scrapy.Request(item['url'], callback=self.parse)
+    def parse_towntr(self, response):
+        for town in self.parse_2td(response, response.selector.css(".towntr"), 'town_name', None):
+            yield town
