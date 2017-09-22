@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # This script is helpful for debugging a spider inside an IDE.
-import os
 import time
 import logging
 from scrapy.crawler import CrawlerRunner
@@ -18,7 +17,7 @@ spiders = ['stats']
 if log_file:
     configure_logging(install_root_handler=False)
     logging.basicConfig(
-        filename='crawl_{}.log'.format(
+        filename='log/crawl_{}.log'.format(
             time.strftime('%Y-%m-%d--%H-%M')),
         filemode='w'
     )

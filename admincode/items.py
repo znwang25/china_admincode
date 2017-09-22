@@ -10,23 +10,26 @@ import scrapy
 
 class AdmincodeItem(scrapy.Item):
     # define the fields for your item here like:
-    name = scrapy.Field()
-    url = scrapy.Field()
-    code = scrapy.Field()
-    codetype = scrapy.Field()
-    parent_code = scrapy.Field()
-    towntypecode = scrapy.Field() # 城乡分类代码为：   100 城镇   110 城区   111 主城区    112 城乡结合区   120 镇区    121 镇中心区   122 镇乡结合区   123 特殊区域   200 乡村   210 乡中心区   220 村庄
+    prov_name = scrapy.Field()
+    city_name = scrapy.Field()
+    county_name = scrapy.Field()
+    town_name = scrapy.Field()
+    gbcode = scrapy.Field()
+    year = scrapy.Field()
+    # 城乡分类代码为：   100 城镇   110 城区   111 主城区    112 城乡结合区   120 镇区    121 镇中心区
+    # 122 镇乡结合区   123 特殊区域   200 乡村   210 乡中心区   220 村庄
+    # towntypecode = scrapy.Field()
 
-    def get_parent(self):
-        if self['codetype'] == 'province':
-            return ('0' * 12)
-        elif self['codetype'] == 'city':
-            return self['code'][0:2] + ('0' * 10)
-        elif self['codetype'] == 'county':
-            return self['code'][0:4] + ('0' * 8)
-        elif self['codetype'] == 'town':
-            return self['code'][0:6] + ('0' * 6)
-        elif self['codetype'] == 'village':
-            return self['code'][0:9] + ('0' * 3)
-        else:
-            raise
+    # def get_parent(self):
+    #     if self['codetype'] == 'province':
+    #         return ('0' * 12)
+    #     elif self['codetype'] == 'city':
+    #         return self['code'][0:2] + ('0' * 10)
+    #     elif self['codetype'] == 'county':
+    #         return self['code'][0:4] + ('0' * 8)
+    #     elif self['codetype'] == 'town':
+    #         return self['code'][0:6] + ('0' * 6)
+    #     elif self['codetype'] == 'village':
+    #         return self['code'][0:9] + ('0' * 3)
+    #     else:
+    #         raise
