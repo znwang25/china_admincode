@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# scraped data file 
+admin_code.csv
+
 # Distribution / packaging
 .Python
 env/
