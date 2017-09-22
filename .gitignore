@@ -102,4 +102,7 @@ ENV/
 
 
 # log file
-/log
+log/*
+
+# exception to the rule
+!log/.gitkeep 
