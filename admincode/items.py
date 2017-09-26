@@ -12,10 +12,13 @@ class AdmincodeItem(scrapy.Item):
     # define the fields for your item here like:
     prov_name = scrapy.Field()
     city_name = scrapy.Field()
+    city_code = scrapy.Field()
     county_name = scrapy.Field()
+    county_code = scrapy.Field()
     town_name = scrapy.Field()
-    gbcode = scrapy.Field()
+    town_code = scrapy.Field()
     year = scrapy.Field()
+
     # 城乡分类代码为：   100 城镇   110 城区   111 主城区    112 城乡结合区   120 镇区    121 镇中心区
     # 122 镇乡结合区   123 特殊区域   200 乡村   210 乡中心区   220 村庄
     # towntypecode = scrapy.Field()
