@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
+from scrapy.spiders import Spider
 from admincode.items import AdmincodeItem
 
 
-class StatsSpider(scrapy.Spider):
+class StatsSpider(Spider):
     name = 'stats'
     allowed_domains = ['stats.gov.cn']
     start_urls = [
-        'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/{}/index.html'.format(year) for year in range(2009, 2017)]
+        'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/{}/index.html'.format(year) for year in range(2009, 2010)]
 
     def parse(self, response):
         for item in self.parse_provincetr(response, response.selector.css(".provincetr")):
@@ -21,26 +22,31 @@ class StatsSpider(scrapy.Spider):
             return td.xpath('a/text()').extract()[0], td.xpath('a/@href').extract()[0]
 
     def parse_provincetr(self, response, trs):
-        year_pattern = re.compile('(tjyqhdmhcxhfdm/)([0-9][0-9][0-9][0-9])')
+        year_pattern = re.compile(
+            '(tjyqhdmhcxhfdm/)([0-9][0-9][0-9][0-9])')
         year = year_pattern.search(response.url).group(2)
         for td in trs.xpath('td'):
-            item = AdmincodeItem()
-            item['year'] = year
-            item['prov_name'], href = self.get_text_href(td)
-
-            if href:
-                url = response.urljoin(href)
-                yield scrapy.Request(url, callback=self.parse_citytr,
-                                     meta={'item': item})
+            scraped = {}
+            scraped['year'] = year
+            scraped['prov_name'], href = self.get_text_href(td)
+            url = response.urljoin(href)
+            yield scrapy.Request(url, callback=self.parse_citytr,
+                                 meta={'scraped': scraped})
 
     def parse_2td(self, response, trs, var_name, nextparse):
         for tr in trs:
-            item = response.meta['item']
-            item[var_name], href = self.get_text_href(tr.xpath('td')[1])
+            scraped = response.meta['scraped']
+            scraped[var_name], href = self.get_text_href(tr.xpath('td')[1])
             if nextparse:
                 url = response.urljoin(href)
-                yield scrapy.Request(url, callback=nextparse, meta={'item': item})
+                yield scrapy.Request(url, callback=nextparse, meta={'scraped': scraped})
             else:
+                item = AdmincodeItem()
+                item['year'] = scraped['year']
+                item['prov_name'] = scraped['prov_name']
+                item['city_name'] = scraped['city_name']
+                item['county_name'] = scraped['county_name']
+                item['town_name'] = scraped['town_name']
                 item['gbcode'], href = self.get_text_href(
                     tr.xpath('td')[0])
                 yield item
