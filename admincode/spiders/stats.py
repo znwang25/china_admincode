@@ -27,12 +27,13 @@ class StatsSpider(Spider):
         for cityrow in response.css(".citytr"):
             city_link = cityrow.xpath("./td[2]/a/@href").extract_first()
             city_name = cityrow.xpath("./td[2]/a/text()").extract_first()
-            city_code = cityrow.xpath("./td[1]/a/text()").extract_first()[0:4]
+            city_code = cityrow.xpath("./td[1]/a/text()").extract_first()
 
             meta_new = deepcopy(meta)
 
             meta_new['city_name'] = city_name
-            meta_new['city_code'] = city_code
+            if city_code:
+                meta_new['city_code'] = city_code[0:4]
 
             yield response.follow(city_link, callback=self.parse_city, meta={'item': meta_new})
 
@@ -44,12 +45,13 @@ class StatsSpider(Spider):
             county_link = countyrow.xpath("./td[2]/a/@href").extract_first()
             county_name = countyrow.xpath("./td[2]/a/text()").extract_first()
             county_code = countyrow.xpath(
-                "./td[1]/a/text()").extract_first()[0:6]
+                "./td[1]/a/text()").extract_first()
 
             meta_new = deepcopy(meta)
 
             meta_new['county_name'] = county_name
-            meta_new['county_code'] = county_code
+            if county_code:
+                meta_new['county_code'] = county_code[0:6]
 
             yield response.follow(county_link, callback=self.parse_county, meta={"item": meta_new})
 
@@ -60,12 +62,13 @@ class StatsSpider(Spider):
         for townrow in response.css(".towntr"):
             # town_link = townrow.xpath("./td[2]/a/@href").extract_first()
             town_name = townrow.xpath("./td[2]/a/text()").extract_first()
-            town_code = townrow.xpath("./td[1]/a/text()").extract_first()[0:9]
+            town_code = townrow.xpath("./td[1]/a/text()").extract_first()
 
             meta_new = deepcopy(meta)
 
             meta_new['town_name'] = town_name
-            meta_new['town_code'] = town_code
+            if city_code:
+                meta_new['town_code'] = town_code[0:9]
 
             item = AdmincodeItem()
             item['year'] = meta_new['year']
