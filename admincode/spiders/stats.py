@@ -67,7 +67,7 @@ class StatsSpider(Spider):
             meta_new = deepcopy(meta)
 
             meta_new['town_name'] = town_name
-            if city_code:
+            if town_code:
                 meta_new['town_code'] = town_code[0:9]
 
             item = AdmincodeItem()
