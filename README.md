@@ -1,17 +1,19 @@
 # china_admincode
-
+中国乡镇区划代码历史数据 2009 - 2016
 This spider scrapes township gbcode from National Bureau of Statistics of the PRC website. The default setting is to scrape all the information from year 2009 to 2016. You can change this range in `stats.py`.
 
 The resulting output will have following variables:
-+ year 
++ year
 + prov_name
-+ city_name 
-+ county_name 
-+ town_name 
-+ gbcode 
++ city_name
++ city_code
++ county_name
++ county_code
++ town_name
++ town_code
 
 ### Usage 
-The only required package is `scrapy`. In the project folder, run following command. 
+The only required package is `scrapy`. In the project folder, run following command: 
 ```python
 python crawl.py
 ```
