@@ -6,8 +6,8 @@ from scrapy.crawler import CrawlerRunner
 from twisted.internet import reactor
 from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
-
-# Switch to Scrapy project folder
+import csv
+import admincode.settings as settings
 
 # Settings
 log_file = True
@@ -32,6 +32,14 @@ else:
 
 # logging.info(spider_schedule_message)
 # time.sleep(30)
+
+# Prepare output csv file with header
+with open(settings.CSV_FILE_PATH, 'w') as f:
+    writer = csv.writer(f, lineterminator='\n')
+    writer.writerow(['year', 'prov_name',
+                     'city_name', 'city_code',
+                     'county_name', 'county_code',
+                     'town_name', 'town_code'])
 
 runner = CrawlerRunner(get_project_settings())
 

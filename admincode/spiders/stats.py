@@ -40,20 +40,45 @@ class StatsSpider(Spider):
     def parse_city(self, response):
 
         meta = response.meta['item']
+        if response.css(".countytr"):
+            for countyrow in response.css(".countytr"):
+                county_link = countyrow.xpath(
+                    "./td[2]/a/@href").extract_first()
+                county_name = countyrow.xpath(
+                    "./td[2]/a/text()").extract_first()
+                county_code = countyrow.xpath(
+                    "./td[1]/a/text()").extract_first()
 
-        for countyrow in response.css(".countytr"):
-            county_link = countyrow.xpath("./td[2]/a/@href").extract_first()
-            county_name = countyrow.xpath("./td[2]/a/text()").extract_first()
-            county_code = countyrow.xpath(
-                "./td[1]/a/text()").extract_first()
+                meta_new = deepcopy(meta)
 
-            meta_new = deepcopy(meta)
+                meta_new['county_name'] = county_name
+                if county_code:
+                    meta_new['county_code'] = county_code[0:6]
 
-            meta_new['county_name'] = county_name
-            if county_code:
-                meta_new['county_code'] = county_code[0:6]
+                yield response.follow(county_link, callback=self.parse_county, meta={"item": meta_new})
+        elif response.css(".towntr"):
+            for townrow in response.css(".towntr"):
+                # town_link = townrow.xpath("./td[2]/a/@href").extract_first()
+                town_name = townrow.xpath("./td[2]/a/text()").extract_first()
+                town_code = townrow.xpath("./td[1]/a/text()").extract_first()
 
-            yield response.follow(county_link, callback=self.parse_county, meta={"item": meta_new})
+                meta_new = deepcopy(meta)
+
+                meta_new['town_name'] = town_name
+                if town_code:
+                    meta_new['town_code'] = town_code[0:9]
+
+                item = AdmincodeItem()
+                item['year'] = meta_new['year']
+                item['prov_name'] = meta_new['prov_name']
+                item['city_name'] = meta_new['city_name']
+                item['city_code'] = meta_new['city_code']
+                item['county_name'] = ""
+                item['county_code'] = ""
+                item['town_name'] = meta_new['town_name']
+                item['town_code'] = meta_new['town_code']
+
+                yield item
 
     def parse_county(self, response):
 
