@@ -12,7 +12,12 @@ from admincode import settings
 def write_to_csv(item):
     writer = csv.writer(
         open(settings.CSV_FILE_PATH, 'a'), lineterminator='\n')
-    writer.writerow([item[key] for key in item.keys()])
+    writer.writerow([item[key] for key in ['year', 'prov_name',
+                                           'city_name', 'city_code',
+                                           'county_name', 'county_code',
+                                           'town_name', 'town_code']])
+
+
 
 
 class CsvExportPipeline(object):
