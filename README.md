@@ -1,6 +1,7 @@
-# china_admincode
-中国乡镇区划代码历史数据 2009 - 2017
-This spider scrapes township gbcode from National Bureau of Statistics of the PRC website. The default setting is to scrape all the information from year 2009 to 2017. You can change this range in `stats.py`.
+# Scraping Chinese Administrative Code （2009-2017）
+(爬虫扒取中国乡镇区划代码历史数据 2009 - 2017)
+
+All chinese administrative units have a unique identifier, aka *gbcode*. Those identifiers are widely used in almost all chinese applications. However, each year some of the gbcode will be changed due to changes in administrative units (name change, boundary change, jurisdiction change etc.). This project aims to preserve the historical record of the gbcode by scraping gbcode for all township and above units from National Bureau of Statistics of the PRC website. The default setting is to scrape all the information from year 2009 to 2017. You can change this range in `stats.py`.
 
 The resulting output will have following variables:
 + year
