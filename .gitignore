@@ -8,7 +8,7 @@ __pycache__/
 
 # scraped data file 
 admin_code.csv
-/bld
+bld
 
 # Distribution / packaging
 .Python
